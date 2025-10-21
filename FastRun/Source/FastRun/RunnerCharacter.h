@@ -32,6 +32,20 @@ protected:
     FVector TargetLocation;
     void UpdateLaneMovement(float DeltaTime);
 
+    //死亡判定処理
+    UFUNCTION()
+    void OnDeath();
+
+    //何かにぶつかった時
+    UFUNCTION()
+    void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
+        UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+    bool bIsDead = false;
+
+    UPROPERTY(EditAnywhere, Category = "Death")
+    float FallThreshold = -200.f; // この高さより下に落ちたら死亡
+
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     /** カメラ用のスプリングアーム（距離調整用） */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
