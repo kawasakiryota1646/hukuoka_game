@@ -80,15 +80,9 @@ void ARunnerCharacter::OnDeath()
     // ƒWƒƒƒ“ƒv‚È‚Ç“ü—Í–³Œø‰»
     DisableInput(nullptr);
 
-    FTimerHandle RestartTimer;
-    GetWorldTimerManager().SetTimer(RestartTimer, this, &ARunnerCharacter::RestartLevel, 2.0f, false);
 
 }
 
-void ARunnerCharacter::RestartLevel()
-{
-    UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
-}
 
 // Called to bind functionality to input
 void ARunnerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
