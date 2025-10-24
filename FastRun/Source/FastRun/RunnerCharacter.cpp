@@ -11,92 +11,99 @@
 #include "TimerManager.h"
 
 
-// Sets default values
 ARunnerCharacter::ARunnerCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = true;
 
-    // --- カメラ設定を追加 ---
+    // === カメラ設定 ===
     SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
     SpringArmComp->SetupAttachment(RootComponent);
-    SpringArmComp->TargetArmLength = 500.f; // キャラとカメラの距離
-    SpringArmComp->SetRelativeRotation(FRotator(-10.f, 0.f, 0.f)); // 斜め上から見下ろす
+    SpringArmComp->TargetArmLength = 500.f;
+    SpringArmComp->SetRelativeRotation(FRotator(-10.f, 0.f, 0.f));
     SpringArmComp->bUsePawnControlRotation = false;
 
     CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
     CameraComp->bUsePawnControlRotation = false;
 
-    GetCharacterMovement()->JumpZVelocity = 1200.f;   // ジャンプの高さ
-    GetCharacterMovement()->AirControl = 0.5f;       // 空中で左右に動ける度合い
+    // === キャラ移動設定 ===
+    GetCharacterMovement()->JumpZVelocity = 1200.f;  // ジャンプ力
+    GetCharacterMovement()->AirControl = 0.5f;       // 空中操作
     GetCharacterMovement()->GravityScale = 2.0f;     // 重力
-    GetCharacterMovement()->MaxWalkSpeed = 600.f;    // 移動速度
+    GetCharacterMovement()->MaxWalkSpeed = 600.f;    // 最大移動速度
 
+    // 衝突イベント登録
     GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &ARunnerCharacter::OnHit);
 }
 
-// Called when the game starts or when spawned
-
-// Called every frame
 void ARunnerCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    // 常に前方向に移動
-    AddMovementInput(GetActorForwardVector(), ForwardSpeed * DeltaTime);
+    // 常に前方に進む
+    if (!bIsDead)
+    {
+        AddMovementInput(GetActorForwardVector(), ForwardSpeed * DeltaTime);
+        UpdateLaneMovement(DeltaTime);
+    }
 
-    // 左右レーン移動処理
-    UpdateLaneMovement(DeltaTime);
-
-    //下に落ちたら
+    // 落下チェック
     if (!bIsDead && GetActorLocation().Z < FallThreshold)
     {
         OnDeath();
     }
 }
 
-void ARunnerCharacter::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
-    UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void ARunnerCharacter::BeginPlay()
 {
-    if (bIsDead) return;
+    Super::BeginPlay();
 
-    //衝突した相手が障害物なら死亡
-    if (OtherActor && OtherActor != this && OtherActor->ActorHasTag("Obstacle"))
+    OnActorBeginOverlap.AddDynamic(this, &ARunnerCharacter::OnOverlapBegin);
+}
+
+
+void ARunnerCharacter::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
+{
+    if (bIsDead || bIsCleared) return;
+
+    if (OtherActor && OtherActor->ActorHasTag("Goal"))
     {
-        OnDeath();
+        OnClear();
     }
 }
 
-void ARunnerCharacter::OnDeath()
+void ARunnerCharacter::OnClear()
 {
-    bIsDead = true;
-    UE_LOG(LogTemp, Warning, TEXT("You Died!"));
+    bIsCleared = true;
 
-    // キャラを止める
+    UE_LOG(LogTemp, Warning, TEXT("Level Cleared!"));
+
+    // 移動・入力停止
     GetCharacterMovement()->DisableMovement();
     DisableInput(nullptr);
 
-    // ジャンプなど入力無効化
-    DisableInput(nullptr);
 
 
+    // フェードアウトや演出を入れたい場合はここで実装可能
+    // 2秒後に次のレベル（または同じレベル再読み込み）
+    FTimerHandle ClearTimer;
+    GetWorldTimerManager().SetTimer(ClearTimer, this, &ARunnerCharacter::RestartLevel, 2.0f, false);
 }
 
-
-// Called to bind functionality to input
 void ARunnerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
+
     PlayerInputComponent->BindAction("MoveLeft", IE_Pressed, this, &ARunnerCharacter::MoveLeft);
     PlayerInputComponent->BindAction("MoveRight", IE_Pressed, this, &ARunnerCharacter::MoveRight);
-
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ARunnerCharacter::Jump);
     PlayerInputComponent->BindAction("Jump", IE_Released, this, &ARunnerCharacter::StopJumping);
 }
 
 void ARunnerCharacter::MoveLeft()
 {
+    if (bIsDead) return;
+
     if (CurrentLane > -1)
     {
         CurrentLane--;
@@ -106,6 +113,8 @@ void ARunnerCharacter::MoveLeft()
 
 void ARunnerCharacter::MoveRight()
 {
+    if (bIsDead) return;
+
     if (CurrentLane < 1)
     {
         CurrentLane++;
@@ -115,9 +124,12 @@ void ARunnerCharacter::MoveRight()
 
 void ARunnerCharacter::Jump()
 {
-    Super::Jump(); 
-
+    if (!bIsDead)
+    {
+        Super::Jump();
+    }
 }
+
 
 void ARunnerCharacter::UpdateLaneMovement(float DeltaTime)
 {
@@ -125,4 +137,37 @@ void ARunnerCharacter::UpdateLaneMovement(float DeltaTime)
     FVector DesiredLocation = FVector(CurrentLocation.X, CurrentLane * LaneOffset, CurrentLocation.Z);
     FVector NewLocation = FMath::VInterpTo(CurrentLocation, DesiredLocation, DeltaTime, 10.f);
     SetActorLocation(NewLocation);
+}
+
+void ARunnerCharacter::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
+    UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+    if (bIsDead) return;
+
+    if (OtherActor && OtherActor != this && OtherActor->ActorHasTag("Obstacle"))
+    {
+        OnDeath();
+    }
+}
+
+void ARunnerCharacter::OnDeath()
+{
+    if (bIsDead) return;
+    bIsDead = true;
+
+    UE_LOG(LogTemp, Warning, TEXT("You Died!"));
+
+    // 移動・入力停止
+    GetCharacterMovement()->DisableMovement();
+    DisableInput(nullptr);
+
+
+    // 2秒後にレベル再読み込み
+    FTimerHandle RestartTimer;
+    GetWorldTimerManager().SetTimer(RestartTimer, this, &ARunnerCharacter::RestartLevel, 2.0f, false);
+}
+
+void ARunnerCharacter::RestartLevel()
+{
+    UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
 }

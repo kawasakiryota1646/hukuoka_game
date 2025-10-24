@@ -14,44 +14,54 @@ class FASTRUN_API ARunnerCharacter : public ACharacter
 public:
     ARunnerCharacter();
 
-protected:
     virtual void Tick(float DeltaTime) override;
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    virtual void Jump() override; // ←追加
 
+protected:
+    virtual void BeginPlay() override;
+
+    // カメラ
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+    class USpringArmComponent* SpringArmComp;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+    class UCameraComponent* CameraComp;
+
+    // 移動
     UPROPERTY(EditAnywhere, Category = "Movement")
-    float ForwardSpeed = 600.f; // 1秒あたりの前進速度
-
+    float ForwardSpeed = 600.f;
     UPROPERTY(EditAnywhere, Category = "Movement")
-    float LaneOffset = 300.f; // レーンの間隔（左右移動用）
+    float LaneOffset = 300.f;
 
-    int CurrentLane = 0; // -1, 0, 1 の3レーン制にする例
+    int CurrentLane = 0;
+    FVector TargetLocation;
 
+    void UpdateLaneMovement(float DeltaTime);
     void MoveLeft();
     void MoveRight();
-    void Jump();
 
-    FVector TargetLocation;
-    void UpdateLaneMovement(float DeltaTime);
+    // 死亡判定
+    UFUNCTION()
+    void OnHit(class UPrimitiveComponent* HitComp, class AActor* OtherActor,
+        class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-    //死亡判定処理
+    UFUNCTION()
+    void OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor);
+
+    UFUNCTION()
+    void OnClear();
+
+    UPROPERTY(BlueprintReadOnly)
+    bool bIsCleared = false;
+
     UFUNCTION()
     void OnDeath();
 
-    //何かにぶつかった時
     UFUNCTION()
-    void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
-        UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+    void RestartLevel();
 
     bool bIsDead = false;
-
     UPROPERTY(EditAnywhere, Category = "Death")
-    float FallThreshold = -200.f; // この高さより下に落ちたら死亡
+    float FallThreshold = -200.f;
 
-    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-    /** カメラ用のスプリングアーム（距離調整用） */
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-    class USpringArmComponent* SpringArmComp;
-
-    /** 実際のカメラ */
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-    class UCameraComponent* CameraComp;
 };
