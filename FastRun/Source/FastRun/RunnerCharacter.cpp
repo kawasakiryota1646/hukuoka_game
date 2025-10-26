@@ -33,7 +33,11 @@ ARunnerCharacter::ARunnerCharacter()
     GetCharacterMovement()->MaxWalkSpeed = 600.f;    // Å‘åˆÚ“®‘¬“x
 
     // Õ“ËƒCƒxƒ“ƒg“o˜^
+    GetCapsuleComponent()->SetNotifyRigidBodyCollision(true);
+    GetCapsuleComponent()->SetGenerateOverlapEvents(false);
     GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &ARunnerCharacter::OnHit);
+
+    GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ARunnerCharacter::OnOverlap);
 }
 
 void ARunnerCharacter::Tick(float DeltaTime)
@@ -142,10 +146,24 @@ void ARunnerCharacter::UpdateLaneMovement(float DeltaTime)
 void ARunnerCharacter::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
     UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+
+    if (bIsDead) return;
+
+    if (OtherActor && OtherActor != this && OtherActor->ActorHasTag("Obstacles"))
+    {
+        OnDeath();
+    }
+}
+
+
+void ARunnerCharacter::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
     if (bIsDead) return;
 
     if (OtherActor && OtherActor != this && OtherActor->ActorHasTag("Obstacle"))
     {
+        UE_LOG(LogTemp, Warning, TEXT("Overlap with Obstacle!"));
         OnDeath();
     }
 }
@@ -164,7 +182,7 @@ void ARunnerCharacter::OnDeath()
 
     // 2•bŒã‚ÉƒŒƒxƒ‹Ä“Ç‚İ‚İ
     FTimerHandle RestartTimer;
-    GetWorldTimerManager().SetTimer(RestartTimer, this, &ARunnerCharacter::RestartLevel, 2.0f, false);
+    GetWorldTimerManager().SetTimer(RestartTimer, this, &ARunnerCharacter::RestartLevel, 1.0f, false);
 }
 
 void ARunnerCharacter::RestartLevel()
