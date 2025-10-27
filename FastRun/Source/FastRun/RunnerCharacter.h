@@ -21,6 +21,10 @@ public:
 protected:
     virtual void BeginPlay() override;
 
+    // --- ジャンプアニメーション用 ---
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
+    bool IsInAir = false; // 空中にいるか
+
     // カメラ
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
     class USpringArmComponent* SpringArmComp;

@@ -52,6 +52,9 @@ void ARunnerCharacter::Tick(float DeltaTime)
         UpdateLaneMovement(DeltaTime);
     }
 
+    //空中にいるかどうかを判定
+    IsInAir = GetCharacterMovement()->IsFalling();
+
     // 落下チェック
     if (!bIsDead && GetActorLocation().Z < FallThreshold)
     {
@@ -193,9 +196,9 @@ void ARunnerCharacter::OnDeath()
     DisableInput(nullptr);
 
 
-    // 2秒後にレベル再読み込み
+    // 0.5秒後にレベル再読み込み
     FTimerHandle RestartTimer;
-    GetWorldTimerManager().SetTimer(RestartTimer, this, &ARunnerCharacter::RestartLevel, 1.0f, false);
+    GetWorldTimerManager().SetTimer(RestartTimer, this, &ARunnerCharacter::RestartLevel, 0.5f, false);
 }
 
 void ARunnerCharacter::RestartLevel()
