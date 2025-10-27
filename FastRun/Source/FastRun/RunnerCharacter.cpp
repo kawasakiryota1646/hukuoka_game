@@ -30,13 +30,14 @@ ARunnerCharacter::ARunnerCharacter()
     GetCharacterMovement()->JumpZVelocity = 1200.f;  // ジャンプ力
     GetCharacterMovement()->AirControl = 0.5f;       // 空中操作
     GetCharacterMovement()->GravityScale = 2.0f;     // 重力
-    GetCharacterMovement()->MaxWalkSpeed = 600.f;    // 最大移動速度
+    GetCharacterMovement()->MaxWalkSpeed = 1000.0f;    // 最大移動速度
 
     // 衝突イベント登録
     GetCapsuleComponent()->SetNotifyRigidBodyCollision(true);
     GetCapsuleComponent()->SetGenerateOverlapEvents(false);
-    GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &ARunnerCharacter::OnHit);
-
+    //GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &ARunnerCharacter::OnHit);
+    GetCapsuleComponent()->SetGenerateOverlapEvents(true);
+    GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ARunnerCharacter::OnBeginOverlap);
     GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ARunnerCharacter::OnOverlap);
 }
 
@@ -157,6 +158,18 @@ void ARunnerCharacter::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 
 
 void ARunnerCharacter::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+    if (bIsDead) return;
+
+    if (OtherActor && OtherActor != this && OtherActor->ActorHasTag("Obstacle"))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Overlap with Obstacle!"));
+        OnDeath();
+    }
+}
+
+void ARunnerCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
     if (bIsDead) return;
