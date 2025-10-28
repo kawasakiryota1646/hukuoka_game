@@ -2,6 +2,7 @@
 
 
 #include "RunnerCharacter.h"
+#include "MyAnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -31,6 +32,7 @@ ARunnerCharacter::ARunnerCharacter()
     GetCharacterMovement()->AirControl = 0.5f;       // 空中操作
     GetCharacterMovement()->GravityScale = 2.0f;     // 重力
     GetCharacterMovement()->MaxWalkSpeed = 1000.0f;    // 最大移動速度
+    GetMesh()->SetAnimInstanceClass(UMyAnimInstance::StaticClass());
 
     // 衝突イベント登録
     GetCapsuleComponent()->SetNotifyRigidBodyCollision(true);
