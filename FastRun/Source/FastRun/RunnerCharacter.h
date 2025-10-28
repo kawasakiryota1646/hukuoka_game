@@ -16,14 +16,11 @@ public:
 
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-    virtual void Jump() override; // ←追加
+    virtual void Jump() override;
+    virtual void Landed(const FHitResult& Hit) override; // ← 追加！
 
 protected:
     virtual void BeginPlay() override;
-
-    // --- ジャンプアニメーション用 ---
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
-    bool IsInAir = false; // 空中にいるか
 
     // カメラ
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -46,11 +43,11 @@ protected:
 
     // 死亡判定
     UFUNCTION()
-
     void OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
         UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
     void OnHit(class UPrimitiveComponent* HitComp, class AActor* OtherActor,
         class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 protected:
     UFUNCTION()
     void OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -74,4 +71,11 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Death")
     float FallThreshold = -200.f;
 
+    // === アニメーション用 ===
+public:
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
+    bool bIsInAir_BP = false;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
+    float Speed = 0.f;
 };

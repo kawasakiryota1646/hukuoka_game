@@ -1,8 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "RunnerCharacter.h"
-#include "MyAnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -10,7 +6,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "TimerManager.h"
-
 
 ARunnerCharacter::ARunnerCharacter()
 {
@@ -28,16 +23,13 @@ ARunnerCharacter::ARunnerCharacter()
     CameraComp->bUsePawnControlRotation = false;
 
     // === キャラ移動設定 ===
-    GetCharacterMovement()->JumpZVelocity = 1200.f;  // ジャンプ力
-    GetCharacterMovement()->AirControl = 0.5f;       // 空中操作
-    GetCharacterMovement()->GravityScale = 2.0f;     // 重力
-    GetCharacterMovement()->MaxWalkSpeed = 1000.0f;    // 最大移動速度
-    GetMesh()->SetAnimInstanceClass(UMyAnimInstance::StaticClass());
+    GetCharacterMovement()->JumpZVelocity = 1200.f;
+    GetCharacterMovement()->AirControl = 0.5f;
+    GetCharacterMovement()->GravityScale = 2.0f;
+    GetCharacterMovement()->MaxWalkSpeed = 1000.0f;
 
     // 衝突イベント登録
     GetCapsuleComponent()->SetNotifyRigidBodyCollision(true);
-    GetCapsuleComponent()->SetGenerateOverlapEvents(false);
-    //GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &ARunnerCharacter::OnHit);
     GetCapsuleComponent()->SetGenerateOverlapEvents(true);
     GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ARunnerCharacter::OnBeginOverlap);
     GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ARunnerCharacter::OnOverlap);
@@ -47,17 +39,18 @@ void ARunnerCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    // 常に前方に進む
     if (!bIsDead)
     {
         AddMovementInput(GetActorForwardVector(), ForwardSpeed * DeltaTime);
         UpdateLaneMovement(DeltaTime);
     }
 
-    //空中にいるかどうかを判定
-    IsInAir = GetCharacterMovement()->IsFalling();
+    // アニメーション用の情報更新
+    FVector Velocity = GetVelocity();
+    Speed = FVector(Velocity.X, Velocity.Y, 0.f).Size();
+    bIsInAir_BP = GetCharacterMovement()->IsFalling();
 
-    // 落下チェック
+    // 落下判定
     if (!bIsDead && GetActorLocation().Z < FallThreshold)
     {
         OnDeath();
@@ -67,37 +60,7 @@ void ARunnerCharacter::Tick(float DeltaTime)
 void ARunnerCharacter::BeginPlay()
 {
     Super::BeginPlay();
-
     OnActorBeginOverlap.AddDynamic(this, &ARunnerCharacter::OnOverlapBegin);
-}
-
-
-void ARunnerCharacter::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
-{
-    if (bIsDead || bIsCleared) return;
-
-    if (OtherActor && OtherActor->ActorHasTag("Goal"))
-    {
-        OnClear();
-    }
-}
-
-void ARunnerCharacter::OnClear()
-{
-    bIsCleared = true;
-
-    UE_LOG(LogTemp, Warning, TEXT("Level Cleared!"));
-
-    // 移動・入力停止
-    GetCharacterMovement()->DisableMovement();
-    DisableInput(nullptr);
-
-
-
-    // フェードアウトや演出を入れたい場合はここで実装可能
-    // 2秒後に次のレベル（または同じレベル再読み込み）
-    FTimerHandle ClearTimer;
-    GetWorldTimerManager().SetTimer(ClearTimer, this, &ARunnerCharacter::RestartLevel, 2.0f, false);
 }
 
 void ARunnerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -110,10 +73,24 @@ void ARunnerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     PlayerInputComponent->BindAction("Jump", IE_Released, this, &ARunnerCharacter::StopJumping);
 }
 
+void ARunnerCharacter::Jump()
+{
+    if (!bIsDead && !bIsInAir_BP)
+    {
+        Super::Jump();
+        bIsInAir_BP = true;
+    }
+}
+
+void ARunnerCharacter::Landed(const FHitResult& Hit)
+{
+    Super::Landed(Hit);
+    bIsInAir_BP = false;
+}
+
 void ARunnerCharacter::MoveLeft()
 {
     if (bIsDead) return;
-
     if (CurrentLane > -1)
     {
         CurrentLane--;
@@ -124,22 +101,12 @@ void ARunnerCharacter::MoveLeft()
 void ARunnerCharacter::MoveRight()
 {
     if (bIsDead) return;
-
     if (CurrentLane < 1)
     {
         CurrentLane++;
         TargetLocation = GetActorLocation() + FVector(0, LaneOffset, 0);
     }
 }
-
-void ARunnerCharacter::Jump()
-{
-    if (!bIsDead)
-    {
-        Super::Jump();
-    }
-}
-
 
 void ARunnerCharacter::UpdateLaneMovement(float DeltaTime)
 {
@@ -149,24 +116,10 @@ void ARunnerCharacter::UpdateLaneMovement(float DeltaTime)
     SetActorLocation(NewLocation);
 }
 
-void ARunnerCharacter::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
-    UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-
-    if (bIsDead) return;
-
-    if (OtherActor && OtherActor != this && OtherActor->ActorHasTag("Obstacles"))
-    {
-        OnDeath();
-    }
-}
-
-
 void ARunnerCharacter::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
     if (bIsDead) return;
-
     if (OtherActor && OtherActor != this && OtherActor->ActorHasTag("Obstacle"))
     {
         UE_LOG(LogTemp, Warning, TEXT("Overlap with Obstacle!"));
@@ -178,7 +131,6 @@ void ARunnerCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
     if (bIsDead) return;
-
     if (OtherActor && OtherActor != this && OtherActor->ActorHasTag("Obstacle"))
     {
         UE_LOG(LogTemp, Warning, TEXT("Overlap with Obstacle!"));
@@ -186,19 +138,34 @@ void ARunnerCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
     }
 }
 
+void ARunnerCharacter::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
+{
+    if (bIsDead || bIsCleared) return;
+    if (OtherActor && OtherActor->ActorHasTag("Goal"))
+    {
+        OnClear();
+    }
+}
+
+void ARunnerCharacter::OnClear()
+{
+    bIsCleared = true;
+    UE_LOG(LogTemp, Warning, TEXT("Level Cleared!"));
+    GetCharacterMovement()->DisableMovement();
+    DisableInput(nullptr);
+
+    FTimerHandle ClearTimer;
+    GetWorldTimerManager().SetTimer(ClearTimer, this, &ARunnerCharacter::RestartLevel, 2.0f, false);
+}
+
 void ARunnerCharacter::OnDeath()
 {
     if (bIsDead) return;
     bIsDead = true;
-
     UE_LOG(LogTemp, Warning, TEXT("You Died!"));
-
-    // 移動・入力停止
     GetCharacterMovement()->DisableMovement();
     DisableInput(nullptr);
 
-
-    // 0.5秒後にレベル再読み込み
     FTimerHandle RestartTimer;
     GetWorldTimerManager().SetTimer(RestartTimer, this, &ARunnerCharacter::RestartLevel, 0.5f, false);
 }
