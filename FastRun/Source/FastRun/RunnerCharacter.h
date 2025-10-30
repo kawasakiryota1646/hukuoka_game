@@ -37,6 +37,25 @@ protected:
     int CurrentLane = 0;
     FVector TargetLocation;
 
+    // スライディング中かどうか
+    UPROPERTY(BlueprintReadOnly, Category = "Movement")
+    bool bIsSliding = false;
+
+    // スライディング時間
+    UPROPERTY(EditAnywhere, Category = "Movement")
+    float SlideDuration = 0.9f;
+
+    // スライディング中の速度倍率
+    UPROPERTY(EditAnywhere, Category = "Movement")
+    float SlideSpeedMultiplier = 1.5f;
+
+    // 元のカプセル高さ
+    float OriginalCapsuleHalfHeight;
+
+    // スライディング開始・終了
+    void StartSlide();
+    void StopSlide();
+
     void UpdateLaneMovement(float DeltaTime);
     void MoveLeft();
     void MoveRight();

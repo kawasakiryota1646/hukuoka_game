@@ -61,6 +61,7 @@ void ARunnerCharacter::BeginPlay()
 {
     Super::BeginPlay();
     OnActorBeginOverlap.AddDynamic(this, &ARunnerCharacter::OnOverlapBegin);
+    OriginalCapsuleHalfHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
 }
 
 void ARunnerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -71,6 +72,9 @@ void ARunnerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     PlayerInputComponent->BindAction("MoveRight", IE_Pressed, this, &ARunnerCharacter::MoveRight);
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ARunnerCharacter::Jump);
     PlayerInputComponent->BindAction("Jump", IE_Released, this, &ARunnerCharacter::StopJumping);
+
+    PlayerInputComponent->BindAction("Slide", IE_Pressed, this, &ARunnerCharacter::StartSlide);
+    PlayerInputComponent->BindAction("Slide", IE_Released, this, &ARunnerCharacter::StopSlide);
 }
 
 void ARunnerCharacter::Jump()
@@ -106,6 +110,35 @@ void ARunnerCharacter::MoveRight()
         CurrentLane++;
         TargetLocation = GetActorLocation() + FVector(0, LaneOffset, 0);
     }
+}
+
+void ARunnerCharacter::StartSlide()
+{
+    if (bIsSliding || !GetCharacterMovement()->IsMovingOnGround()) return;
+
+    bIsSliding = true;
+
+    // カプセルを小さくしてしゃがむような姿勢に
+    GetCapsuleComponent()->SetCapsuleHalfHeight(OriginalCapsuleHalfHeight * 0.5f);
+
+    // スライディング時は速度を少し上げる
+    GetCharacterMovement()->MaxWalkSpeed *= SlideSpeedMultiplier;
+
+    UE_LOG(LogTemp, Warning, TEXT("Slide Start!"));
+}
+
+void ARunnerCharacter::StopSlide()
+{
+    if (!bIsSliding) return;
+    bIsSliding = false;
+
+    // カプセルを戻す
+    GetCapsuleComponent()->SetCapsuleHalfHeight(OriginalCapsuleHalfHeight);
+
+    // スピードも戻す
+    GetCharacterMovement()->MaxWalkSpeed /= SlideSpeedMultiplier;
+
+    UE_LOG(LogTemp, Warning, TEXT("Slide End!"));
 }
 
 void ARunnerCharacter::UpdateLaneMovement(float DeltaTime)
