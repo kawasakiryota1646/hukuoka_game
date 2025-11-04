@@ -1,4 +1,4 @@
-#include "RunnerCharacter.h"
+ï»¿#include "RunnerCharacter.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -11,7 +11,7 @@ ARunnerCharacter::ARunnerCharacter()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    // === ƒJƒƒ‰İ’è ===
+    // === ã‚«ãƒ¡ãƒ©è¨­å®š ===
     SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
     SpringArmComp->SetupAttachment(RootComponent);
     SpringArmComp->TargetArmLength = 500.f;
@@ -22,13 +22,13 @@ ARunnerCharacter::ARunnerCharacter()
     CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
     CameraComp->bUsePawnControlRotation = false;
 
-    // === ƒLƒƒƒ‰ˆÚ“®İ’è ===
+    // === ã‚­ãƒ£ãƒ©ç§»å‹•è¨­å®š ===
     GetCharacterMovement()->JumpZVelocity = 1200.f;
     GetCharacterMovement()->AirControl = 0.5f;
     GetCharacterMovement()->GravityScale = 2.0f;
     GetCharacterMovement()->MaxWalkSpeed = 1000.0f;
 
-    // Õ“ËƒCƒxƒ“ƒg“o˜^
+    // è¡çªã‚¤ãƒ™ãƒ³ãƒˆç™»éŒ²
     GetCapsuleComponent()->SetNotifyRigidBodyCollision(true);
     GetCapsuleComponent()->SetGenerateOverlapEvents(true);
     GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ARunnerCharacter::OnBeginOverlap);
@@ -45,12 +45,12 @@ void ARunnerCharacter::Tick(float DeltaTime)
         UpdateLaneMovement(DeltaTime);
     }
 
-    // ƒAƒjƒ[ƒVƒ‡ƒ“—p‚Ìî•ñXV
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç”¨ã®æƒ…å ±æ›´æ–°
     FVector Velocity = GetVelocity();
     Speed = FVector(Velocity.X, Velocity.Y, 0.f).Size();
     bIsInAir_BP = GetCharacterMovement()->IsFalling();
 
-    // —‰º”»’è
+    // è½ä¸‹åˆ¤å®š
     if (!bIsDead && GetActorLocation().Z < FallThreshold)
     {
         OnDeath();
@@ -118,10 +118,14 @@ void ARunnerCharacter::StartSlide()
 
     bIsSliding = true;
 
-    // ƒJƒvƒZƒ‹‚ğ¬‚³‚­‚µ‚Ä‚µ‚á‚ª‚Ş‚æ‚¤‚Èp¨‚É
+    // ã‚«ãƒ—ã‚»ãƒ«ã‚’å°ã•ãã—ã¦ã—ã‚ƒãŒã‚€ã‚ˆã†ãªå§¿å‹¢ã«
     GetCapsuleComponent()->SetCapsuleHalfHeight(OriginalCapsuleHalfHeight * 0.5f);
 
-    // ƒXƒ‰ƒCƒfƒBƒ“ƒO‚Í‘¬“x‚ğ­‚µã‚°‚é
+    // ğŸ‘‡ ãƒ¡ãƒƒã‚·ãƒ¥ã‚’å°‘ã—ä¸Šã«ãšã‚‰ã™ï¼ˆè¦‹ãŸç›®ç”¨ï¼‰
+    GetMesh()->AddLocalOffset(FVector(0.f, 0.f, 35.f));
+
+
+    // ã‚¹ãƒ©ã‚¤ãƒ‡ã‚£ãƒ³ã‚°æ™‚ã¯é€Ÿåº¦ã‚’å°‘ã—ä¸Šã’ã‚‹
     GetCharacterMovement()->MaxWalkSpeed *= SlideSpeedMultiplier;
 
     UE_LOG(LogTemp, Warning, TEXT("Slide Start!"));
@@ -132,11 +136,14 @@ void ARunnerCharacter::StopSlide()
     if (!bIsSliding) return;
     bIsSliding = false;
 
-    // ƒJƒvƒZƒ‹‚ğ–ß‚·
+    // ã‚«ãƒ—ã‚»ãƒ«ã‚’æˆ»ã™
     GetCapsuleComponent()->SetCapsuleHalfHeight(OriginalCapsuleHalfHeight);
 
-    // ƒXƒs[ƒh‚à–ß‚·
+    // ã‚¹ãƒ”ãƒ¼ãƒ‰ã‚’æˆ»ã™
     GetCharacterMovement()->MaxWalkSpeed /= SlideSpeedMultiplier;
+
+    //ãƒ¡ãƒƒã‚·ãƒ¥ã‚’æˆ»ã‚‹
+    GetMesh()->AddLocalOffset(FVector(0.f, 0.f, -35.f));
 
     UE_LOG(LogTemp, Warning, TEXT("Slide End!"));
 }
