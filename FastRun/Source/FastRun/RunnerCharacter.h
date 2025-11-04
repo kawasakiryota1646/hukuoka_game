@@ -28,10 +28,15 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
     class UCameraComponent* CameraComp;
 
-    // 移動
-    UPROPERTY(EditAnywhere, Category = "Movement")
-    float ForwardSpeed = 600.f;
-    UPROPERTY(EditAnywhere, Category = "Movement")
+    // 速度関係
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+    float ForwardSpeed = 600.f; // 初期スピード
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+    float MaxForwardSpeed = 2500.f; // 最大スピード
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+    float AccelerationRate = 100.f; // 毎秒どれくらい上げるか    UPROPERTY(EditAnywhere, Category = "Movement")
     float LaneOffset = 300.f;
 
     int CurrentLane = 0;

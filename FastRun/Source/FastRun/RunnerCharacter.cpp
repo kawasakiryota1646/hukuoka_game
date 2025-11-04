@@ -26,7 +26,7 @@ ARunnerCharacter::ARunnerCharacter()
     GetCharacterMovement()->JumpZVelocity = 1200.f;
     GetCharacterMovement()->AirControl = 0.5f;
     GetCharacterMovement()->GravityScale = 2.0f;
-    GetCharacterMovement()->MaxWalkSpeed = 1000.0f;
+    GetCharacterMovement()->MaxWalkSpeed = 1800.0f;
 
     // 衝突イベント登録
     GetCapsuleComponent()->SetNotifyRigidBodyCollision(true);
@@ -41,6 +41,12 @@ void ARunnerCharacter::Tick(float DeltaTime)
 
     if (!bIsDead)
     {
+        //徐々に加速させる
+        if (ForwardSpeed < MaxForwardSpeed)
+        {
+            ForwardSpeed += AccelerationRate * DeltaTime;
+            ForwardSpeed = FMath::Clamp(ForwardSpeed, 0.f, MaxForwardSpeed);
+        }
         AddMovementInput(GetActorForwardVector(), ForwardSpeed * DeltaTime);
         UpdateLaneMovement(DeltaTime);
     }
