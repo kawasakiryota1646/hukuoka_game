@@ -1,8 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Blueprint/UserWidget.h"
 #include "GameFramework/Character.h"
 #include "RunnerCharacter.generated.h"
 
@@ -17,47 +18,55 @@ public:
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     virtual void Jump() override;
-    virtual void Landed(const FHitResult& Hit) override; // © ’Ç‰ÁI
+    virtual void Landed(const FHitResult& Hit) override; // â† è¿½åŠ ï¼
 
 protected:
     virtual void BeginPlay() override;
 
-    // ƒJƒƒ‰
+    // ã‚«ãƒ¡ãƒ©
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
     class USpringArmComponent* SpringArmComp;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
     class UCameraComponent* CameraComp;
 
-    // ‘¬“xŠÖŒW
+    // ğŸ”¹ ã‚¯ãƒªã‚¢UIã‚¯ãƒ©ã‚¹ï¼ˆBlueprintã§è¨­å®šï¼‰
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UUserWidget> ClearWidgetClass;
+
+    // ğŸ”¹ è¡¨ç¤ºä¸­ã®UI
+    UPROPERTY()
+    UUserWidget* ClearWidgetInstance;
+
+    // é€Ÿåº¦é–¢ä¿‚
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-    float ForwardSpeed = 600.f; // ‰ŠúƒXƒs[ƒh
+    float ForwardSpeed = 600.f; // åˆæœŸã‚¹ãƒ”ãƒ¼ãƒ‰
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-    float MaxForwardSpeed = 2500.f; // Å‘åƒXƒs[ƒh
+    float MaxForwardSpeed = 2500.f; // æœ€å¤§ã‚¹ãƒ”ãƒ¼ãƒ‰
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-    float AccelerationRate = 100.f; // –ˆ•b‚Ç‚ê‚­‚ç‚¢ã‚°‚é‚©    UPROPERTY(EditAnywhere, Category = "Movement")
+    float AccelerationRate = 100.f; // æ¯ç§’ã©ã‚Œãã‚‰ã„ä¸Šã’ã‚‹ã‹    UPROPERTY(EditAnywhere, Category = "Movement")
     float LaneOffset = 300.f;
 
     int CurrentLane = 0;
     FVector TargetLocation;
 
-    // ƒXƒ‰ƒCƒfƒBƒ“ƒO’†‚©‚Ç‚¤‚©
+    // ã‚¹ãƒ©ã‚¤ãƒ‡ã‚£ãƒ³ã‚°ä¸­ã‹ã©ã†ã‹
     UPROPERTY(BlueprintReadOnly, Category = "Movement")
     bool bIsSliding = false;
 
-    // ƒXƒ‰ƒCƒfƒBƒ“ƒOŠÔ
+    // ã‚¹ãƒ©ã‚¤ãƒ‡ã‚£ãƒ³ã‚°æ™‚é–“
     UPROPERTY(EditAnywhere, Category = "Movement")
     float SlideDuration = 0.9f;
 
-    // ƒXƒ‰ƒCƒfƒBƒ“ƒO’†‚Ì‘¬“x”{—¦
+    // ã‚¹ãƒ©ã‚¤ãƒ‡ã‚£ãƒ³ã‚°ä¸­ã®é€Ÿåº¦å€ç‡
     UPROPERTY(EditAnywhere, Category = "Movement")
     float SlideSpeedMultiplier = 1.5f;
 
-    // Œ³‚ÌƒJƒvƒZƒ‹‚‚³
+    // å…ƒã®ã‚«ãƒ—ã‚»ãƒ«é«˜ã•
     float OriginalCapsuleHalfHeight;
 
-    // ƒXƒ‰ƒCƒfƒBƒ“ƒOŠJnEI—¹
+    // ã‚¹ãƒ©ã‚¤ãƒ‡ã‚£ãƒ³ã‚°é–‹å§‹ãƒ»çµ‚äº†
     void StartSlide();
     void StopSlide();
 
@@ -65,7 +74,7 @@ protected:
     void MoveLeft();
     void MoveRight();
 
-    // €–S”»’è
+    // æ­»äº¡åˆ¤å®š
     UFUNCTION()
     void OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
         UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -95,11 +104,26 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Death")
     float FallThreshold = -200.f;
 
-    // === ƒAƒjƒ[ƒVƒ‡ƒ“—p ===
+    // === ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç”¨ ===
 public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
     bool bIsInAir_BP = false;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
     float Speed = 0.f;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Score")
+    int32 Score = 0;
+
+    UFUNCTION(BlueprintCallable, Category = "Score")
+    void AddScore(int32 Value);
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> ScoreWidgetClass;
+
+    // Blueprintã‹ã‚‰èª­ã‚ã‚‹Getter
+    UFUNCTION(BlueprintCallable, Category = "Score")
+    int32 GetScore() const { return Score; }
+
+    UUserWidget* ScoreWidgetInstance;
 };

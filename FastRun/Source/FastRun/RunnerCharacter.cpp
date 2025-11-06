@@ -68,6 +68,15 @@ void ARunnerCharacter::BeginPlay()
     Super::BeginPlay();
     OnActorBeginOverlap.AddDynamic(this, &ARunnerCharacter::OnOverlapBegin);
     OriginalCapsuleHalfHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+
+    if (ScoreWidgetClass)
+    {
+        ScoreWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), ScoreWidgetClass);
+        if (ScoreWidgetInstance)
+        {
+            ScoreWidgetInstance->AddToViewport();
+        }
+    }
 }
 
 void ARunnerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -192,13 +201,22 @@ void ARunnerCharacter::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActo
         OnClear();
     }
 }
-
+//クリア判定
 void ARunnerCharacter::OnClear()
 {
     bIsCleared = true;
     UE_LOG(LogTemp, Warning, TEXT("Level Cleared!"));
     GetCharacterMovement()->DisableMovement();
     DisableInput(nullptr);
+
+    if (ClearWidgetClass)
+    {
+        ClearWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), ClearWidgetClass);
+        if (ClearWidgetInstance)
+        {
+            ClearWidgetInstance->AddToViewport();
+        }
+    }
 
     FTimerHandle ClearTimer;
     GetWorldTimerManager().SetTimer(ClearTimer, this, &ARunnerCharacter::RestartLevel, 2.0f, false);
@@ -215,8 +233,15 @@ void ARunnerCharacter::OnDeath()
     FTimerHandle RestartTimer;
     GetWorldTimerManager().SetTimer(RestartTimer, this, &ARunnerCharacter::RestartLevel, 0.5f, false);
 }
-
+//リスタート
 void ARunnerCharacter::RestartLevel()
 {
     UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
+}
+
+//スコア
+void ARunnerCharacter::AddScore(int32 Amount)
+{
+    Score += Amount;
+    UE_LOG(LogTemp, Warning, TEXT("Score: %d"), Score);
 }
