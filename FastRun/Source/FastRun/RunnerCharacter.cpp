@@ -128,7 +128,7 @@ void ARunnerCharacter::StartSlide()
     GetCapsuleComponent()->SetCapsuleHalfHeight(OriginalCapsuleHalfHeight * 0.5f);
 
     // 👇 メッシュを少し上にずらす（見た目用）
-    GetMesh()->AddLocalOffset(FVector(0.f, 0.f, 35.f));
+    GetMesh()->AddLocalOffset(FVector(0.f, 0.f, 40.f));
 
 
     // スライディング時は速度を少し上げる
