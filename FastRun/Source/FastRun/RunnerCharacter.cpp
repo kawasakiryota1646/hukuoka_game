@@ -244,4 +244,14 @@ void ARunnerCharacter::AddScore(int32 Amount)
 {
     Score += Amount;
     UE_LOG(LogTemp, Warning, TEXT("Score: %d"), Score);
+
+    // スピードアップ処理
+    if (Score % 1 == 0) // 10枚ごとにスピードアップ
+    {
+        ForwardSpeed += 500.f;  // 前進スピードを100上げる
+        GetCharacterMovement()->MaxWalkSpeed += 500.f;
+
+        UE_LOG(LogTemp, Warning, TEXT("Speed Up! New Speed: %f"), ForwardSpeed);
+    }
+
 }
