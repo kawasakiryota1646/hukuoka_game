@@ -26,7 +26,7 @@ ARunnerCharacter::ARunnerCharacter()
     GetCharacterMovement()->JumpZVelocity = 1200.f;
     GetCharacterMovement()->AirControl = 0.5f;
     GetCharacterMovement()->GravityScale = 2.0f;
-    GetCharacterMovement()->MaxWalkSpeed = 1800.0f;
+    GetCharacterMovement()->MaxWalkSpeed = 2500.0f;
 
     // 衝突イベント登録
     GetCapsuleComponent()->SetNotifyRigidBodyCollision(true);
@@ -246,10 +246,10 @@ void ARunnerCharacter::AddScore(int32 Amount)
     UE_LOG(LogTemp, Warning, TEXT("Score: %d"), Score);
 
     // スピードアップ処理
-    if (Score % 1 == 0) // 1枚ごとにスピードアップ
+    if (Score % 2 == 0) // 1枚ごとにスピードアップ
     {
         ForwardSpeed += 300.f;  // 前進スピードを100上げる
-        GetCharacterMovement()->MaxWalkSpeed += 5000.f;
+        GetCharacterMovement()->MaxWalkSpeed += 200.f;
 
         UE_LOG(LogTemp, Warning, TEXT("Speed Up! New Speed: %f"), ForwardSpeed);
     }

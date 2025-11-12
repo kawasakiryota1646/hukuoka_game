@@ -39,7 +39,7 @@ protected:
 
     // 速度関係
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-    float ForwardSpeed = 600.f; // 初期スピード
+    float ForwardSpeed = 400.f; // 初期スピード
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float MaxForwardSpeed = 2500.f; // 最大スピード
