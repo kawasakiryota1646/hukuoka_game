@@ -248,8 +248,8 @@ void ARunnerCharacter::AddScore(int32 Amount)
     // スピードアップ処理
     if (Score % 2 == 0) // 1枚ごとにスピードアップ
     {
-        ForwardSpeed += 300.f;  // 前進スピードを100上げる
-        GetCharacterMovement()->MaxWalkSpeed += 200.f;
+        ForwardSpeed += 50.f;  // 前進スピードを100上げる
+        GetCharacterMovement()->MaxWalkSpeed += 100.f;
 
         UE_LOG(LogTemp, Warning, TEXT("Speed Up! New Speed: %f"), ForwardSpeed);
     }
