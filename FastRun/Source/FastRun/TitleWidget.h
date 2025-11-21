@@ -16,14 +16,15 @@ class FASTRUN_API UTitleWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
+
+public:
+    virtual bool Initialize() override;
+
 protected:
-	void NativeConstruct() override;
+    UPROPERTY(meta = (BindWidget))
+    class UButton* StartButton;
 
-private:
-	UPROPERTY(meta=(BindWidget))
-	UButton* ButtonPlay;
-
-	UFUNCTION()
-	void OnButtonPlayClicked();
+    UFUNCTION()
+    void OnStartClicked();
 
 };

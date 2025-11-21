@@ -5,16 +5,30 @@
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
 
-void UTitleWidget::NativeConstruct()
+bool UTitleWidget::Initialize()
 {
 	Super::NativeConstruct();
 
-	ButtonPlay->OnClicked.AddUniqueDynamic(this, &UTitleWidget::OnButtonPlayClicked);
+    if (!Super::Initialize()) return false;
+
+    if (StartButton)
+    {
+        StartButton->OnClicked.AddDynamic(this, &UTitleWidget::OnStartClicked);
+    }
+
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("StartButton is NULL! Check BindWidget name."));
+    }
+
+    return true;
 
 }
 
-void UTitleWidget::OnButtonPlayClicked()
+
+void UTitleWidget::OnStartClicked()
 {
-	UGameplayStatics::OpenLevel(GetWorld(), FName(TEXT("stage1")));
+    // ƒQ[ƒ€ƒŒƒxƒ‹‚É‘JˆÚ
+    UGameplayStatics::OpenLevel(this, FName("stage1"));
 
 }

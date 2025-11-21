@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "TitleWidget.h"
 #include "TitleHUD.generated.h"
 
 class UUserWidget; 
@@ -17,4 +18,9 @@ class FASTRUN_API ATitleHUD : public AHUD
 	GENERATED_BODY()
 protected:
 	virtual void BeginPlay() override;
+
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UTitleWidget> TitleWidget;
+
 };
