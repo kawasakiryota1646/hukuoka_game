@@ -29,6 +29,6 @@ bool UTitleWidget::Initialize()
 void UTitleWidget::OnStartClicked()
 {
     // ƒQ[ƒ€ƒŒƒxƒ‹‚É‘JˆÚ
-    UGameplayStatics::OpenLevel(this, FName("stage1"));
+    UGameplayStatics::OpenLevel(this, FName("StageSelect"));
 
 }
