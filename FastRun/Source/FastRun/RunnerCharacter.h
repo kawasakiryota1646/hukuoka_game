@@ -104,6 +104,11 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Death")
     float FallThreshold = -200.f;
 
+    UFUNCTION()
+    void MoveLevel();
+
+
+
     // === アニメーション用 ===
 public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")

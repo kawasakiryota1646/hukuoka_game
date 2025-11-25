@@ -219,7 +219,7 @@ void ARunnerCharacter::OnClear()
     }
 
     FTimerHandle ClearTimer;
-    GetWorldTimerManager().SetTimer(ClearTimer, this, &ARunnerCharacter::RestartLevel, 2.0f, false);
+    GetWorldTimerManager().SetTimer(ClearTimer, this, &ARunnerCharacter::MoveLevel, 2.0f, false);
 }
 
 void ARunnerCharacter::OnDeath()
@@ -237,6 +237,11 @@ void ARunnerCharacter::OnDeath()
 void ARunnerCharacter::RestartLevel()
 {
     UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
+}
+
+void ARunnerCharacter::MoveLevel()
+{
+    UGameplayStatics::OpenLevel(this, FName("StageSelect"));
 }
 
 //スコア
