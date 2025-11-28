@@ -46,6 +46,11 @@ protected:
     UUserWidget* GameOverWidgetInstance;
 
 
+
+    //サウンド
+    UPROPERTY(EditAnywhere, Category = "Sound")
+    USoundBase* ClearSound;
+
     // 速度関係
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float ForwardSpeed = 400.f; // 初期スピード

@@ -22,6 +22,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UStaticMeshComponent* MeshComp;
 
+	//サウンド
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* PickupSound;
+
 	// 当たり判定（オーバーラップ用）
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class USphereComponent* CollisionComp;

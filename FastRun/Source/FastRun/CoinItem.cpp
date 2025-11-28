@@ -4,6 +4,7 @@
 #include "CoinItem.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "RunnerCharacter.h"
 
 // Sets default values
@@ -47,6 +48,16 @@ void ACoinItem::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
     {
         // スコア加算処理（Player側に関数を作るのが良い）
         Player->AddScore(1);
+
+        if (PickupSound)
+        {
+            UGameplayStatics::PlaySoundAtLocation(
+                this,
+                PickupSound,
+                GetActorLocation()
+            );
+        }
+
         Destroy(); // アイテムを消す
     }
 }

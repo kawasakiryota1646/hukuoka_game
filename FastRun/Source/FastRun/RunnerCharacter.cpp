@@ -226,6 +226,15 @@ void ARunnerCharacter::OnClear()
             ClearWidgetInstance->AddToViewport();
         }
     }
+    if (ClearSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(
+            this,
+            ClearSound,
+            GetActorLocation()
+        );
+    }
+
 
     FTimerHandle ClearTimer;
     GetWorldTimerManager().SetTimer(ClearTimer, this, &ARunnerCharacter::MoveLevel, 2.0f, false);
@@ -264,8 +273,10 @@ void ARunnerCharacter::RestartLevel()
 
 void ARunnerCharacter::MoveLevel()
 {
-    UGameplayStatics::OpenLevel(this, FName("StageSelect"));
+    UGameplayStatics::OpenLevel(this, FName("stage1"));
 }
+
+
 
 //スコア
 void ARunnerCharacter::AddScore(int32 Amount)
