@@ -29,13 +29,22 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
     class UCameraComponent* CameraComp;
 
-    // 🔹 クリアUIクラス（Blueprintで設定）
+    //クリアUIクラス（Blueprintで設定）
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<UUserWidget> ClearWidgetClass;
 
-    // 🔹 表示中のUI
+    //ゲームオーバーUIクラス（Blueprintで設定）
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UUserWidget> GameOverWidgetClass;
+
+
+    //表示中のUI
     UPROPERTY()
     UUserWidget* ClearWidgetInstance;
+
+    UPROPERTY()
+    UUserWidget* GameOverWidgetInstance;
+
 
     // 速度関係
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
@@ -45,7 +54,7 @@ protected:
     float MaxForwardSpeed = 2500.f; // 最大スピード
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-    float AccelerationRate = 100.f; // 毎秒どれくらい上げるか    UPROPERTY(EditAnywhere, Category = "Movement")
+    float AccelerationRate = 100.f; // 毎秒どれくらい上げるか
     float LaneOffset = 300.f;
 
     int CurrentLane = 0;

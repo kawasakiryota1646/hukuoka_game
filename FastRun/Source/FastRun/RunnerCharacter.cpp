@@ -66,6 +66,12 @@ void ARunnerCharacter::Tick(float DeltaTime)
 void ARunnerCharacter::BeginPlay()
 {
     Super::BeginPlay();
+    APlayerController* PC = Cast<APlayerController>(GetController());
+    if (PC)
+    {
+        EnableInput(PC);
+        UE_LOG(LogTemp, Warning, TEXT("Input Enabled in BeginPlay!"));
+    }
     OnActorBeginOverlap.AddDynamic(this, &ARunnerCharacter::OnOverlapBegin);
     OriginalCapsuleHalfHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
 
@@ -207,8 +213,11 @@ void ARunnerCharacter::OnClear()
     bIsCleared = true;
     UE_LOG(LogTemp, Warning, TEXT("Level Cleared!"));
     GetCharacterMovement()->DisableMovement();
-    DisableInput(nullptr);
-
+    APlayerController* PC = Cast<APlayerController>(GetController());
+    if (PC)
+    {
+        DisableInput(PC);
+    }
     if (ClearWidgetClass)
     {
         ClearWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), ClearWidgetClass);
@@ -228,10 +237,24 @@ void ARunnerCharacter::OnDeath()
     bIsDead = true;
     UE_LOG(LogTemp, Warning, TEXT("You Died!"));
     GetCharacterMovement()->DisableMovement();
-    DisableInput(nullptr);
+    APlayerController* PC = Cast<APlayerController>(GetController());
+    if (PC)
+    {
+        DisableInput(PC);
+    }
+
+    if (GameOverWidgetClass)
+    {
+        GameOverWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), GameOverWidgetClass);
+        if (GameOverWidgetInstance)
+        {
+            GameOverWidgetInstance->AddToViewport();
+        }
+    }
+
 
     FTimerHandle RestartTimer;
-    GetWorldTimerManager().SetTimer(RestartTimer, this, &ARunnerCharacter::RestartLevel, 0.5f, false);
+    GetWorldTimerManager().SetTimer(RestartTimer, this, &ARunnerCharacter::RestartLevel, 1.5f, false);
 }
 //リスタート
 void ARunnerCharacter::RestartLevel()
