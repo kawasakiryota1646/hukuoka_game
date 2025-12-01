@@ -79,9 +79,9 @@ void ARunnerCharacter::BeginPlay()
         // 念のため先に Disable してから Enable
         DisableInput(PC);
         EnableInput(PC);
-
-        PC->bShowMouseCursor = false;  // StageSelect の影響を消す
-        FInputModeGameOnly InputMode;
+        PC->bShowMouseCursor = true;
+        FInputModeGameAndUI InputMode;
+        InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
         PC->SetInputMode(InputMode);
 
         UE_LOG(LogTemp, Warning, TEXT("Force Input ENABLED!"));
@@ -286,7 +286,7 @@ void ARunnerCharacter::RestartLevel()
 
 void ARunnerCharacter::MoveLevel()
 {
-    UGameplayStatics::OpenLevel(this, FName("stageselect"));
+    UGameplayStatics::OpenLevel(this, FName("StageSelect"));
 }
 
 
@@ -304,7 +304,7 @@ void ARunnerCharacter::AddScore(int32 Amount)
 
         UE_LOG(LogTemp, Warning, TEXT("Speed Up! New Speed: %f"), ForwardSpeed);
     }
-    if (Score > 50)
+    if (Score > 30)
     {
         if (MotionImage)
         {
