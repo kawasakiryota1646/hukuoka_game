@@ -69,14 +69,22 @@ void ARunnerCharacter::Tick(float DeltaTime)
 void ARunnerCharacter::BeginPlay()
 {
     Super::BeginPlay();
-    APlayerController* PC = Cast<APlayerController>(GetController());
+
+    // プレイヤーコントローラーを強制取得
+    APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
     if (PC)
     {
+        // 念のため先に Disable してから Enable
+        DisableInput(PC);
         EnableInput(PC);
-        UE_LOG(LogTemp, Warning, TEXT("Input Enabled in BeginPlay!"));
+
+        PC->bShowMouseCursor = false;  // StageSelect の影響を消す
+        FInputModeGameOnly InputMode;
+        PC->SetInputMode(InputMode);
+
+        UE_LOG(LogTemp, Warning, TEXT("Force Input ENABLED!"));
     }
-    OnActorBeginOverlap.AddDynamic(this, &ARunnerCharacter::OnOverlapBegin);
-    OriginalCapsuleHalfHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
 
     if (ScoreWidgetClass)
     {
@@ -86,7 +94,9 @@ void ARunnerCharacter::BeginPlay()
             ScoreWidgetInstance->AddToViewport();
         }
     }
+
 }
+
 
 void ARunnerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
