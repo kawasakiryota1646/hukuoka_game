@@ -39,6 +39,9 @@ void ARunnerCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+    if (bIsDead) return;
+
+
     if (!bIsDead)
     {
         //徐々に加速させる
@@ -192,7 +195,7 @@ void ARunnerCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
     if (bIsDead) return;
-    if (OtherActor && OtherActor != this && OtherActor->ActorHasTag("Obstacle"))
+    if (OtherActor && OtherActor != this && OtherActor->ActorHasTag("Obstacle")&& OtherActor->ActorHasTag(FName("Death")))
     {
         UE_LOG(LogTemp, Warning, TEXT("Overlap with Obstacle!"));
         OnDeath();
@@ -275,7 +278,6 @@ void ARunnerCharacter::MoveLevel()
 {
     UGameplayStatics::OpenLevel(this, FName("stage1"));
 }
-
 
 
 //スコア
