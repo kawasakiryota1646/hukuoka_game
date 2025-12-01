@@ -1,5 +1,6 @@
 ﻿#include "RunnerCharacter.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/Image.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
@@ -28,17 +29,17 @@ ARunnerCharacter::ARunnerCharacter()
     GetCharacterMovement()->GravityScale = 2.0f;
     GetCharacterMovement()->MaxWalkSpeed = 2500.0f;
 
+    OriginalCapsuleHalfHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+
     // 衝突イベント登録
     GetCapsuleComponent()->SetNotifyRigidBodyCollision(true);
     GetCapsuleComponent()->SetGenerateOverlapEvents(true);
     GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ARunnerCharacter::OnBeginOverlap);
-    GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ARunnerCharacter::OnOverlap);
 }
 
 void ARunnerCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-
     if (bIsDead) return;
 
 
@@ -92,6 +93,17 @@ void ARunnerCharacter::BeginPlay()
         if (ScoreWidgetInstance)
         {
             ScoreWidgetInstance->AddToViewport();
+        }
+    }
+    if (SpeedEffectClass)
+    {
+        SpeedEffectWidget = CreateWidget<UUserWidget>(GetWorld(), SpeedEffectClass);
+        if (SpeedEffectWidget)
+        {
+            SpeedEffectWidget->AddToViewport();
+
+            // MotionImage 取得（UMGの名前と一致する必要あり）
+            MotionImage = Cast<UImage>(SpeedEffectWidget->GetWidgetFromName(TEXT("MotionImage")));
         }
     }
 
@@ -190,37 +202,25 @@ void ARunnerCharacter::UpdateLaneMovement(float DeltaTime)
     SetActorLocation(NewLocation);
 }
 
-void ARunnerCharacter::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-    if (bIsDead) return;
-    if (OtherActor && OtherActor != this && OtherActor->ActorHasTag("Obstacle"))
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Overlap with Obstacle!"));
-        OnDeath();
-    }
-}
-
 void ARunnerCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    if (bIsDead) return;
-    if (OtherActor && OtherActor != this && OtherActor->ActorHasTag("Obstacle")&& OtherActor->ActorHasTag(FName("Death")))
+    if (bIsDead || bIsCleared) return;
+    if (!OtherActor || OtherActor == this) return;
+
+    // --- Obstacle Death ---
+    if (OtherActor->ActorHasTag("Obstacle"))
     {
-        UE_LOG(LogTemp, Warning, TEXT("Overlap with Obstacle!"));
+        UE_LOG(LogTemp, Warning, TEXT("Hit Obstacle!"));
         OnDeath();
     }
-}
-
-void ARunnerCharacter::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
-{
-    if (bIsDead || bIsCleared) return;
-    if (OtherActor && OtherActor->ActorHasTag("Goal"))
+    // --- Goal Clear ---
+    else if (OtherActor->ActorHasTag("Goal"))
     {
+        UE_LOG(LogTemp, Warning, TEXT("Hit Goal!"));
         OnClear();
     }
 }
-//クリア判定
 void ARunnerCharacter::OnClear()
 {
     bIsCleared = true;
@@ -286,7 +286,7 @@ void ARunnerCharacter::RestartLevel()
 
 void ARunnerCharacter::MoveLevel()
 {
-    UGameplayStatics::OpenLevel(this, FName("stage1"));
+    UGameplayStatics::OpenLevel(this, FName("stageselect"));
 }
 
 
@@ -303,6 +303,17 @@ void ARunnerCharacter::AddScore(int32 Amount)
         GetCharacterMovement()->MaxWalkSpeed += 70.f;
 
         UE_LOG(LogTemp, Warning, TEXT("Speed Up! New Speed: %f"), ForwardSpeed);
+    }
+    if (Score > 50)
+    {
+        if (MotionImage)
+        {
+            float NewAlpha = FMath::Clamp(Score * 5.f, 0.f, 5.f);
+
+            FLinearColor Col = MotionImage->ColorAndOpacity;
+            Col.A = NewAlpha;
+            MotionImage->SetColorAndOpacity(Col);
+        }
     }
 
 }

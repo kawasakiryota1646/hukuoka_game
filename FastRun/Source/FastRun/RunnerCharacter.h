@@ -7,6 +7,9 @@
 #include "GameFramework/Character.h"
 #include "RunnerCharacter.generated.h"
 
+class UImage;
+
+
 UCLASS()
 class FASTRUN_API ARunnerCharacter : public ACharacter
 {
@@ -45,6 +48,11 @@ protected:
     UUserWidget* GameOverWidgetInstance;
 
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> SpeedEffectClass;
+
+    UUserWidget* SpeedEffectWidget;
+    UImage* MotionImage;
 
     //サウンド
     UPROPERTY(EditAnywhere, Category = "Sound")
@@ -86,18 +94,12 @@ protected:
     void UpdateLaneMovement(float DeltaTime);
     void MoveLeft();
     void MoveRight();
+protected:
 
     // 死亡判定
     UFUNCTION()
-    void OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-        UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-protected:
-    UFUNCTION()
     void OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
         UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-    UFUNCTION()
-    void OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor);
 
     UFUNCTION()
     void OnClear();
