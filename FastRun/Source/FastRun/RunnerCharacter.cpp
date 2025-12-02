@@ -286,7 +286,7 @@ void ARunnerCharacter::RestartLevel()
 
 void ARunnerCharacter::MoveLevel()
 {
-    UGameplayStatics::OpenLevel(this, FName("StageSelect"));
+    UGameplayStatics::OpenLevel(this, FName("stage2"));
 }
 
 
@@ -297,7 +297,7 @@ void ARunnerCharacter::AddScore(int32 Amount)
     UE_LOG(LogTemp, Warning, TEXT("Score: %d"), Score);
 
     // スピードアップ処理
-    if (Score % 4 == 0) // 1枚ごとにスピードアップ
+    if (Score % 2 == 0) // 1枚ごとにスピードアップ
     {
         ForwardSpeed += 30.f;  // 前進スピードを100上げる
         GetCharacterMovement()->MaxWalkSpeed += 70.f;

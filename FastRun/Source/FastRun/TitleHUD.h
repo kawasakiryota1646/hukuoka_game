@@ -16,6 +16,7 @@ UCLASS()
 class FASTRUN_API ATitleHUD : public AHUD
 {
 	GENERATED_BODY()
+
 protected:
 	virtual void BeginPlay() override;
 

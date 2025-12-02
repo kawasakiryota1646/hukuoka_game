@@ -27,4 +27,9 @@ protected:
     UFUNCTION()
     void OnStartClicked();
 
+    UFUNCTION()
+    void NativeConstruct();
+
+
+
 };

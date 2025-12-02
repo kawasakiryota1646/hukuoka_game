@@ -7,24 +7,27 @@
 
 bool UTitleWidget::Initialize()
 {
-	Super::NativeConstruct();
-
-    if (!Super::Initialize()) return false;
+    if (!Super::Initialize())
+    {
+        return false;
+    }
 
     if (StartButton)
     {
         StartButton->OnClicked.AddDynamic(this, &UTitleWidget::OnStartClicked);
     }
-
     else
     {
         UE_LOG(LogTemp, Error, TEXT("StartButton is NULL! Check BindWidget name."));
     }
 
     return true;
-
 }
 
+void UTitleWidget::NativeConstruct()
+{
+    Super::NativeConstruct();
+}
 
 void UTitleWidget::OnStartClicked()
 {
