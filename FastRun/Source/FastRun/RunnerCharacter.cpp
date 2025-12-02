@@ -40,28 +40,27 @@ ARunnerCharacter::ARunnerCharacter()
 void ARunnerCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-    if (bIsDead) return;
 
+    // ★ 死亡 or クリアしたら動作を完全停止！
+    if (bIsDead || bIsCleared) return;
 
-    if (!bIsDead)
+    // --- 前進処理 ---
+    if (ForwardSpeed < MaxForwardSpeed)
     {
-        //徐々に加速させる
-        if (ForwardSpeed < MaxForwardSpeed)
-        {
-            ForwardSpeed += AccelerationRate * DeltaTime;
-            ForwardSpeed = FMath::Clamp(ForwardSpeed, 0.f, MaxForwardSpeed);
-        }
-        AddMovementInput(GetActorForwardVector(), ForwardSpeed * DeltaTime);
-        UpdateLaneMovement(DeltaTime);
+        ForwardSpeed += AccelerationRate * DeltaTime;
+        ForwardSpeed = FMath::Clamp(ForwardSpeed, 0.f, MaxForwardSpeed);
     }
 
-    // アニメーション用の情報更新
+    AddMovementInput(GetActorForwardVector(), ForwardSpeed * DeltaTime);
+    UpdateLaneMovement(DeltaTime);
+
+    // アニメ情報更新
     FVector Velocity = GetVelocity();
     Speed = FVector(Velocity.X, Velocity.Y, 0.f).Size();
     bIsInAir_BP = GetCharacterMovement()->IsFalling();
 
     // 落下判定
-    if (!bIsDead && GetActorLocation().Z < FallThreshold)
+    if (GetActorLocation().Z < FallThreshold)
     {
         OnDeath();
     }
@@ -224,13 +223,41 @@ void ARunnerCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
 void ARunnerCharacter::OnClear()
 {
     bIsCleared = true;
-    UE_LOG(LogTemp, Warning, TEXT("Level Cleared!"));
-    GetCharacterMovement()->DisableMovement();
-    APlayerController* PC = Cast<APlayerController>(GetController());
-    if (PC)
+
+    // ① モンタージュは AnimInstance 経由で再生（絶対安全）
+    if (GoalMontage)
     {
-        DisableInput(PC);
+        UAnimInstance* Anim = GetMesh()->GetAnimInstance();
+        if (Anim)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Play Goal Montage"));
+            Anim->Montage_Play(GoalMontage);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("AnimInstance is NULL!"));
+        }
     }
+
+    UE_LOG(LogTemp, Warning, TEXT("Level Cleared!"));
+
+    // ② DisableMovement はアニメ再生の後に少し遅延させる（重要）
+    FTimerHandle DelayHandle;
+    GetWorldTimerManager().SetTimer(
+        DelayHandle,
+        [this]()
+        {
+            GetCharacterMovement()->DisableMovement();
+            if (APlayerController* PC = Cast<APlayerController>(GetController()))
+            {
+                DisableInput(PC);
+            }
+        },
+        0.1f,    // ← これでアニメ再生が確実に始まる
+        false
+    );
+
+    // UI
     if (ClearWidgetClass)
     {
         ClearWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), ClearWidgetClass);
@@ -239,32 +266,56 @@ void ARunnerCharacter::OnClear()
             ClearWidgetInstance->AddToViewport();
         }
     }
+
     if (ClearSound)
     {
-        UGameplayStatics::PlaySoundAtLocation(
-            this,
-            ClearSound,
-            GetActorLocation()
-        );
+        UGameplayStatics::PlaySoundAtLocation(this, ClearSound, GetActorLocation());
     }
 
-
+    // レベル移動
     FTimerHandle ClearTimer;
     GetWorldTimerManager().SetTimer(ClearTimer, this, &ARunnerCharacter::MoveLevel, 2.0f, false);
 }
-
 void ARunnerCharacter::OnDeath()
 {
     if (bIsDead) return;
     bIsDead = true;
+
     UE_LOG(LogTemp, Warning, TEXT("You Died!"));
-    GetCharacterMovement()->DisableMovement();
-    APlayerController* PC = Cast<APlayerController>(GetController());
-    if (PC)
+
+    // ① まずアニメを再生！！
+    if (DeathMontage)
     {
-        DisableInput(PC);
+        UAnimInstance* Anim = GetMesh()->GetAnimInstance();
+        if (Anim)
+        {
+            Anim->Montage_Play(DeathMontage);
+            UE_LOG(LogTemp, Warning, TEXT("Death Montage Playing!"));
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("AnimInstance is NULL!"));
+        }
     }
 
+    // ② 移動停止は少し遅らせる（←重要）
+    FTimerHandle DelayHandle;
+    GetWorldTimerManager().SetTimer(
+        DelayHandle,
+        [this]()
+        {
+            GetCharacterMovement()->DisableMovement();
+
+            if (APlayerController* PC = Cast<APlayerController>(GetController()))
+            {
+                DisableInput(PC);
+            }
+        },
+        0.1f,    // ← これが大事！アニメを止めずに済む
+        false
+    );
+
+    // ③ UI
     if (GameOverWidgetClass)
     {
         GameOverWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), GameOverWidgetClass);
@@ -274,9 +325,9 @@ void ARunnerCharacter::OnDeath()
         }
     }
 
-
+    // ④ レベルリスタート
     FTimerHandle RestartTimer;
-    GetWorldTimerManager().SetTimer(RestartTimer, this, &ARunnerCharacter::RestartLevel, 1.5f, false);
+    GetWorldTimerManager().SetTimer(RestartTimer, this, &ARunnerCharacter::RestartLevel, 5.5f, false);
 }
 //リスタート
 void ARunnerCharacter::RestartLevel()

@@ -127,14 +127,25 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
     bool bIsInAir_BP = false;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+    UAnimMontage* DeathMontage;
+
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
     float Speed = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+    UAnimMontage* GoalMontage;
+
 
     UPROPERTY(BlueprintReadOnly, Category = "Score")
     int32 Score = 0;
 
     UFUNCTION(BlueprintCallable, Category = "Score")
     void AddScore(int32 Value);
+
+
+
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> ScoreWidgetClass;
