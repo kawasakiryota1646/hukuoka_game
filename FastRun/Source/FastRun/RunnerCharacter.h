@@ -9,7 +9,6 @@
 
 class UImage;
 
-
 UCLASS()
 class FASTRUN_API ARunnerCharacter : public ACharacter
 {
@@ -21,8 +20,7 @@ public:
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     virtual void Jump() override;
-    virtual void Landed(const FHitResult& Hit) override; // ← 追加！
-
+    virtual void Landed(const FHitResult& Hit) override;
 protected:
     virtual void BeginPlay() override;
 
@@ -143,9 +141,6 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Score")
     void AddScore(int32 Value);
-
-
-
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> ScoreWidgetClass;

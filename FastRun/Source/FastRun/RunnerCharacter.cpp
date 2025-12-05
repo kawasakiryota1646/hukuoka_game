@@ -59,6 +59,7 @@ void ARunnerCharacter::Tick(float DeltaTime)
     Speed = FVector(Velocity.X, Velocity.Y, 0.f).Size();
     bIsInAir_BP = GetCharacterMovement()->IsFalling();
 
+
     // 落下判定
     if (GetActorLocation().Z < FallThreshold)
     {
@@ -105,8 +106,10 @@ void ARunnerCharacter::BeginPlay()
             MotionImage = Cast<UImage>(SpeedEffectWidget->GetWidgetFromName(TEXT("MotionImage")));
         }
     }
-
 }
+
+
+
 
 
 void ARunnerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -274,7 +277,7 @@ void ARunnerCharacter::OnClear()
 
     // レベル移動
     FTimerHandle ClearTimer;
-    GetWorldTimerManager().SetTimer(ClearTimer, this, &ARunnerCharacter::MoveLevel, 2.0f, false);
+    GetWorldTimerManager().SetTimer(ClearTimer, this, &ARunnerCharacter::MoveLevel, 5.0f, false);
 }
 void ARunnerCharacter::OnDeath()
 {
@@ -327,7 +330,7 @@ void ARunnerCharacter::OnDeath()
 
     // ④ レベルリスタート
     FTimerHandle RestartTimer;
-    GetWorldTimerManager().SetTimer(RestartTimer, this, &ARunnerCharacter::RestartLevel, 5.5f, false);
+    GetWorldTimerManager().SetTimer(RestartTimer, this, &ARunnerCharacter::RestartLevel, 1.5f, false);
 }
 //リスタート
 void ARunnerCharacter::RestartLevel()
@@ -337,7 +340,7 @@ void ARunnerCharacter::RestartLevel()
 
 void ARunnerCharacter::MoveLevel()
 {
-    UGameplayStatics::OpenLevel(this, FName("stage2"));
+    UGameplayStatics::OpenLevel(this, FName("StageSelect"));
 }
 
 
