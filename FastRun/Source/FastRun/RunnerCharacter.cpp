@@ -59,7 +59,6 @@ void ARunnerCharacter::Tick(float DeltaTime)
     Speed = FVector(Velocity.X, Velocity.Y, 0.f).Size();
     bIsInAir_BP = GetCharacterMovement()->IsFalling();
 
-
     // 落下判定
     if (GetActorLocation().Z < FallThreshold)
     {
@@ -227,6 +226,18 @@ void ARunnerCharacter::OnClear()
 {
     bIsCleared = true;
 
+    if (SpringArmComp)
+    {
+        // カメラを真横向き（右側から見る場合）
+        SpringArmComp->SetRelativeRotation(FRotator(0.f, 0.f, 0.f));
+        SpringArmComp->SocketOffset = FVector(0.f, 0.f, -100.f);
+        SpringArmComp->TargetArmLength = 400.f; 
+    }
+
+    FRotator MeshRot = GetMesh()->GetRelativeRotation();
+    MeshRot.Yaw += 180.f;
+    GetMesh()->SetRelativeRotation(MeshRot);
+
     // ① モンタージュは AnimInstance 経由で再生（絶対安全）
     if (GoalMontage)
     {
@@ -277,7 +288,7 @@ void ARunnerCharacter::OnClear()
 
     // レベル移動
     FTimerHandle ClearTimer;
-    GetWorldTimerManager().SetTimer(ClearTimer, this, &ARunnerCharacter::MoveLevel, 5.0f, false);
+    GetWorldTimerManager().SetTimer(ClearTimer, this, &ARunnerCharacter::MoveLevel, 13.0f, false);
 }
 void ARunnerCharacter::OnDeath()
 {
