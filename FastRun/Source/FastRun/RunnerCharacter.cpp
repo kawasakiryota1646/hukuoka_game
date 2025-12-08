@@ -7,7 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "TimerManager.h"
-
+#include "Components/TextBlock.h"
+#include "Components/CanvasPanelSlot.h" 
 ARunnerCharacter::ARunnerCharacter()
 {
     PrimaryActorTick.bCanEverTick = true;
@@ -40,7 +41,7 @@ ARunnerCharacter::ARunnerCharacter()
 void ARunnerCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-
+    if (bIsCountdown) return;
     // ★ 死亡 or クリアしたら動作を完全停止！
     if (bIsDead || bIsCleared) return;
 
@@ -105,10 +106,74 @@ void ARunnerCharacter::BeginPlay()
             MotionImage = Cast<UImage>(SpeedEffectWidget->GetWidgetFromName(TEXT("MotionImage")));
         }
     }
+
+    if (CountdownWidgetClass)
+    {
+        CountdownWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), CountdownWidgetClass);
+        if (CountdownWidgetInstance)
+        {
+            CountdownWidgetInstance->AddToViewport();
+        }
+    }
+
+
+    StartCountdown();
+
 }
 
+void ARunnerCharacter::StartCountdown()
+{
+    bIsCountdown = true;
 
+    if (APlayerController* PC = Cast<APlayerController>(GetController()))
+    {
+        DisableInput(PC);
+    }
 
+    CountdownCount = 3;
+
+    GetWorldTimerManager().SetTimer(
+        CountdownTimerHandle,
+        this,
+        &ARunnerCharacter::CountdownTick,
+        1.0f,
+        true
+    );
+}
+void ARunnerCharacter::CountdownTick()
+{
+    UTextBlock* Text = Cast<UTextBlock>(CountdownWidgetInstance->GetWidgetFromName(TEXT("CountdownText")));
+
+    if (!Text) return;
+
+    if (CountdownCount > 0)
+    {
+        Text->SetText(FText::AsNumber(CountdownCount));
+    }
+    else if (CountdownCount == 0)
+    {
+        Text->SetText(FText::FromString(TEXT("START!")));
+        if (UCanvasPanelSlot* Slot = Cast<UCanvasPanelSlot>(Text->Slot))
+        {
+            Slot->SetPosition(FVector2D(-600.f, -250.f));   // ← 好きな位置に変更
+        }
+    }
+    else
+    {
+        CountdownWidgetInstance->RemoveFromParent();
+        bIsCountdown = false;
+
+        if (APlayerController* PC = Cast<APlayerController>(GetController()))
+        {
+            EnableInput(PC);
+        }
+
+        GetWorldTimerManager().ClearTimer(CountdownTimerHandle);
+        return;
+    }
+
+    CountdownCount--;
+}
 
 
 void ARunnerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -190,7 +255,7 @@ void ARunnerCharacter::StopSlide()
     GetCharacterMovement()->MaxWalkSpeed /= SlideSpeedMultiplier;
 
     //メッシュを戻る
-    GetMesh()->AddLocalOffset(FVector(0.f, 0.f, -35.f));
+    GetMesh()->AddLocalOffset(FVector(0.f, 0.f, -40.f));
 
     UE_LOG(LogTemp, Warning, TEXT("Slide End!"));
 }

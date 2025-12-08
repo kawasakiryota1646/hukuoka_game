@@ -45,7 +45,20 @@ protected:
     UPROPERTY()
     UUserWidget* GameOverWidgetInstance;
 
+    // カウントダウンUI
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UUserWidget> CountdownWidgetClass;
+    FTimerHandle CountdownTimerHandle;
+    int32 CountdownCount = 3;
 
+    UUserWidget* CountdownWidgetInstance;
+    UFUNCTION()
+    void StartCountdown();
+    UFUNCTION()
+    void CountdownTick();
+
+    // カウントダウン中フラグ
+    bool bIsCountdown = true;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> SpeedEffectClass;
 
