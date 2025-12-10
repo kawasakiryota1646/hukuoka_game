@@ -17,8 +17,8 @@ AGoalActor::AGoalActor()
     BoxComp->SetCollisionProfileName("Trigger"); // トリガーに設定
 
     // メッシュ（見た目用）
-    MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
-    MeshComp->SetupAttachment(RootComponent);
+    //MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
+    //MeshComp->SetupAttachment(RootComponent);
 
     // ゴール用タグ
     Tags.Add("Goal");
