@@ -233,7 +233,7 @@ void ARunnerCharacter::StartSlide()
     // カプセルを小さくしてしゃがむような姿勢に
     GetCapsuleComponent()->SetCapsuleHalfHeight(OriginalCapsuleHalfHeight * 0.5f);
 
-    // 👇 メッシュを少し上にずらす（見た目用）
+    // メッシュを少し上にずらす（見た目用）
     GetMesh()->AddLocalOffset(FVector(0.f, 0.f, 40.f));
 
 
