@@ -353,7 +353,7 @@ void ARunnerCharacter::OnClear()
 
     // レベル移動
     FTimerHandle ClearTimer;
-    GetWorldTimerManager().SetTimer(ClearTimer, this, &ARunnerCharacter::MoveLevel, 13.0f, false);
+    GetWorldTimerManager().SetTimer(ClearTimer, this, &ARunnerCharacter::MoveLevel, 10.0f, false);
 }
 void ARunnerCharacter::OnDeath()
 {
@@ -406,7 +406,7 @@ void ARunnerCharacter::OnDeath()
 
     // ④ レベルリスタート
     FTimerHandle RestartTimer;
-    GetWorldTimerManager().SetTimer(RestartTimer, this, &ARunnerCharacter::RestartLevel, 1.5f, false);
+    GetWorldTimerManager().SetTimer(RestartTimer, this, &ARunnerCharacter::RestartLevel, 1.0f, false);
 }
 //リスタート
 void ARunnerCharacter::RestartLevel()
