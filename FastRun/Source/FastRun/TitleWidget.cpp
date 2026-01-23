@@ -21,6 +21,11 @@ bool UTitleWidget::Initialize()
         UE_LOG(LogTemp, Error, TEXT("StartButton is NULL! Check BindWidget name."));
     }
 
+    if (ExitButton)
+    {
+        ExitButton->OnClicked.AddDynamic(this, &UTitleWidget::OnExitClicked);
+    }
+
     return true;
 }
 
@@ -34,4 +39,10 @@ void UTitleWidget::OnStartClicked()
     // ƒQ[ƒ€ƒŒƒxƒ‹‚É‘JˆÚ
     UGameplayStatics::OpenLevel(this, FName("StageSelect"));
 
+}
+
+void UTitleWidget::OnExitClicked()
+{
+    //ƒQ[ƒ€I—¹
+    UKismetSystemLibrary::QuitGame(this,nullptr,EQuitPreference::Quit,false);
 }

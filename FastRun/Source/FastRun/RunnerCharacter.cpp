@@ -77,9 +77,7 @@ void ARunnerCharacter::BeginPlay()
     if (PC)
     {
         // 念のため先に Disable してから Enable
-        DisableInput(PC);
-        EnableInput(PC);
-        PC->bShowMouseCursor = true;
+        PC->bShowMouseCursor = false;
         FInputModeGameAndUI InputMode;
         InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
         PC->SetInputMode(InputMode);

@@ -24,9 +24,14 @@ protected:
     UPROPERTY(meta = (BindWidget))
     class UButton* StartButton;
 
+    UPROPERTY(meta = (BindWidget))
+    UButton* ExitButton;
+
     UFUNCTION()
     void OnStartClicked();
+    UFUNCTION()
 
+    void OnExitClicked();
     UFUNCTION()
     void NativeConstruct();
 
