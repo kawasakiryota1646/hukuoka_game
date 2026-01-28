@@ -135,6 +135,18 @@ protected:
     UFUNCTION()
     void MoveLevel();
 
+    public:
+    // Pause
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UUserWidget> PauseWidgetClass;
+
+    UPROPERTY()
+    UUserWidget* PauseWidgetInstance;
+
+    bool bIsPaused = false;
+
+    void TogglePause();
+    void ResumeGame();
 
 
     // === アニメーション用 ===

@@ -185,6 +185,9 @@ void ARunnerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
     PlayerInputComponent->BindAction("Slide", IE_Pressed, this, &ARunnerCharacter::StartSlide);
     PlayerInputComponent->BindAction("Slide", IE_Released, this, &ARunnerCharacter::StopSlide);
+
+    PlayerInputComponent->BindAction("PauseGame", IE_Pressed, this, &ARunnerCharacter::TogglePause);
+
 }
 
 void ARunnerCharacter::Jump()
@@ -425,6 +428,80 @@ void ARunnerCharacter::MoveLevel()
     UGameplayStatics::OpenLevel(this, FName("StageSelect"));
 }
 
+void ARunnerCharacter::TogglePause()
+{
+    if (bIsDead || bIsCleared) return;
+
+    APlayerController* PC = Cast<APlayerController>(GetController());
+    if (!PC) return;
+
+    if (!bIsPaused)
+    {
+        // ---- Pause ----
+        bIsPaused = true;
+
+        UGameplayStatics::SetGamePaused(GetWorld(), true);
+
+        if (PauseWidgetClass)
+        {
+            PauseWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), PauseWidgetClass);
+            if (PauseWidgetInstance)
+            {
+                PauseWidgetInstance->AddToViewport();
+            }
+        }
+
+        PC->bShowMouseCursor = true;
+        PC->SetInputMode(FInputModeUIOnly());
+        UGameplayStatics::SetGamePaused(GetWorld(), true);
+    }
+}
+
+void ARunnerCharacter::ResumeGame()
+{
+
+    APlayerController* PC = Cast<APlayerController>(GetController());
+    if (!PC) return;
+
+    bIsPaused = false;
+
+
+    //Pause解除
+    UGameplayStatics::SetGamePaused(GetWorld(), false);
+
+    //Pause UI 削除
+    if (PauseWidgetInstance)
+    {
+        PauseWidgetInstance->RemoveFromParent();
+        PauseWidgetInstance = nullptr;
+    }
+
+    //既存カウントダウン削除
+    if (CountdownWidgetInstance)
+    {
+        CountdownWidgetInstance->RemoveFromParent();
+        CountdownWidgetInstance = nullptr;
+    }
+
+    //Widget作り直す
+    CountdownWidgetInstance =
+        CreateWidget<UUserWidget>(PC, CountdownWidgetClass);
+
+    if (CountdownWidgetInstance)
+    {
+        CountdownWidgetInstance->AddToViewport(100);
+    }
+
+    if (PC)
+    {
+        PC->bShowMouseCursor = false;
+        PC->SetInputMode(FInputModeGameOnly());
+        //DisableInput(PC);
+    }
+
+    //カウントダウン開始
+    StartCountdown();
+}
 
 //スコア
 void ARunnerCharacter::AddScore(int32 Amount)
