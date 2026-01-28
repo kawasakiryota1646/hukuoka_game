@@ -42,7 +42,7 @@ void ARunnerCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
     if (bIsCountdown) return;
-    // ★ 死亡 or クリアしたら動作を完全停止！
+    //死亡 or クリアしたら動作を完全停止
     if (bIsDead || bIsCleared) return;
 
     // --- 前進処理 ---
@@ -76,7 +76,7 @@ void ARunnerCharacter::BeginPlay()
 
     if (PC)
     {
-        // 念のため先に Disable してから Enable
+      
         PC->bShowMouseCursor = false;
         FInputModeGameAndUI InputMode;
         InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
@@ -100,7 +100,7 @@ void ARunnerCharacter::BeginPlay()
         {
             SpeedEffectWidget->AddToViewport();
 
-            // MotionImage 取得（UMGの名前と一致する必要あり）
+            // MotionImage 取得
             MotionImage = Cast<UImage>(SpeedEffectWidget->GetWidgetFromName(TEXT("MotionImage")));
         }
     }
@@ -301,7 +301,7 @@ void ARunnerCharacter::OnClear()
     MeshRot.Yaw += 180.f;
     GetMesh()->SetRelativeRotation(MeshRot);
 
-    // ① モンタージュは AnimInstance 経由で再生（絶対安全）
+    //モンタージュ再生
     if (GoalMontage)
     {
         UAnimInstance* Anim = GetMesh()->GetAnimInstance();
@@ -318,7 +318,8 @@ void ARunnerCharacter::OnClear()
 
     UE_LOG(LogTemp, Warning, TEXT("Level Cleared!"));
 
-    // ② DisableMovement はアニメ再生の後に少し遅延させる（重要）
+    //アニメーションを遅らせる
+
     FTimerHandle DelayHandle;
     GetWorldTimerManager().SetTimer(
         DelayHandle,
@@ -360,7 +361,7 @@ void ARunnerCharacter::OnDeath()
 
     UE_LOG(LogTemp, Warning, TEXT("You Died!"));
 
-    // ① まずアニメを再生！！
+    // ① アニメを再生
     if (DeathMontage)
     {
         UAnimInstance* Anim = GetMesh()->GetAnimInstance();
@@ -375,7 +376,7 @@ void ARunnerCharacter::OnDeath()
         }
     }
 
-    // ② 移動停止は少し遅らせる（←重要）
+    // ② 移動停止は少し遅らせる
     FTimerHandle DelayHandle;
     GetWorldTimerManager().SetTimer(
         DelayHandle,
@@ -388,7 +389,7 @@ void ARunnerCharacter::OnDeath()
                 DisableInput(PC);
             }
         },
-        0.1f,    // ← これが大事！アニメを止めずに済む
+        0.1f,
         false
     );
 
@@ -401,6 +402,13 @@ void ARunnerCharacter::OnDeath()
             GameOverWidgetInstance->AddToViewport();
         }
     }
+    //Sound
+    if (DeadSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, DeadSound, GetActorLocation());
+    }
+
+
 
     // ④ レベルリスタート
     FTimerHandle RestartTimer;

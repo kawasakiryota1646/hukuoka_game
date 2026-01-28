@@ -69,6 +69,10 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Sound")
     USoundBase* ClearSound;
 
+    UPROPERTY(EditAnywhere, Category = "Sound")
+    USoundBase* DeadSound;
+
+
     // 速度関係
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float ForwardSpeed = 400.f; // 初期スピード
