@@ -36,6 +36,8 @@ void UTitleWidget::NativeConstruct()
 
 void UTitleWidget::OnStartClicked()
 {
+
+
     // ƒQ[ƒ€ƒŒƒxƒ‹‚É‘JˆÚ
     UGameplayStatics::OpenLevel(this, FName("StageSelect"));
 

@@ -4,36 +4,32 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "TitleWidget.generated.h"
+#include "ClearWidget.generated.h"
 
 class UButton;
+
 
 /**
  * 
  */
 UCLASS()
-class FASTRUN_API UTitleWidget : public UUserWidget
+class FASTRUN_API UClearWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
-
 public:
     virtual bool Initialize() override;
 
 protected:
     UPROPERTY(meta = (BindWidget))
-    class UButton* StartButton;
+    class UButton* ClearButton;
 
-    UPROPERTY(meta = (BindWidget))
-    UButton* ExitButton;
 
     UFUNCTION()
-    void OnStartClicked();
-    UFUNCTION()
-
-    void OnExitClicked();
+    void OnClearClicked();
     UFUNCTION()
     void NativeConstruct();
+
 
 
 };

@@ -75,6 +75,14 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Sound")
     USoundBase* SpeedSound;
 
+    UPROPERTY(EditAnywhere, Category = "Sound")
+    USoundBase* StartSound;
+
+
+    UPROPERTY(EditAnywhere, Category = "Sound")
+    USoundBase* CountSound;
+
+
 
     // 速度関係
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
@@ -96,11 +104,14 @@ protected:
 
     // スライディング時間
     UPROPERTY(EditAnywhere, Category = "Movement")
-    float SlideDuration = 0.9f;
+    float SlideDuration = 1.5f;
 
     // スライディング中の速度倍率
     UPROPERTY(EditAnywhere, Category = "Movement")
     float SlideSpeedMultiplier = 1.5f;
+
+    // ローリング用タイマー
+    FTimerHandle RollTimerHandle;
 
     // 元のカプセル高さ
     float OriginalCapsuleHalfHeight;

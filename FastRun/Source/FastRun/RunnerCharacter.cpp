@@ -146,10 +146,20 @@ void ARunnerCharacter::CountdownTick()
 
     if (CountdownCount > 0)
     {
+        if (CountSound)
+        {
+            UGameplayStatics::PlaySoundAtLocation(this, CountSound, GetActorLocation());
+        }
+
         Text->SetText(FText::AsNumber(CountdownCount));
     }
     else if (CountdownCount == 0)
     {
+        if (StartSound)
+        {
+            UGameplayStatics::PlaySoundAtLocation(this,StartSound, GetActorLocation());
+        }
+
         Text->SetText(FText::FromString(TEXT("START!")));
         if (UCanvasPanelSlot* Slot = Cast<UCanvasPanelSlot>(Text->Slot))
         {
@@ -184,7 +194,6 @@ void ARunnerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     PlayerInputComponent->BindAction("Jump", IE_Released, this, &ARunnerCharacter::StopJumping);
 
     PlayerInputComponent->BindAction("Slide", IE_Pressed, this, &ARunnerCharacter::StartSlide);
-    PlayerInputComponent->BindAction("Slide", IE_Released, this, &ARunnerCharacter::StopSlide);
 
     PlayerInputComponent->BindAction("PauseGame", IE_Pressed, this, &ARunnerCharacter::TogglePause);
 
@@ -227,21 +236,33 @@ void ARunnerCharacter::MoveRight()
 
 void ARunnerCharacter::StartSlide()
 {
-    if (bIsSliding || !GetCharacterMovement()->IsMovingOnGround()) return;
+    if (bIsSliding) return;
+    if (!GetCharacterMovement()->IsMovingOnGround()) return;
 
     bIsSliding = true;
 
-    // カプセルを小さくしてしゃがむような姿勢に
+    // カプセル縮小
     GetCapsuleComponent()->SetCapsuleHalfHeight(OriginalCapsuleHalfHeight * 0.5f);
 
-    // メッシュを少し上にずらす（見た目用）
-    GetMesh()->AddLocalOffset(FVector(0.f, 0.f, 40.f));
+    // 見た目調整
+    GetMesh()->AddLocalOffset(FVector(0.f, 0.f, 50.f));
 
-
-    // スライディング時は速度を少し上げる
+    // スピードアップ
     GetCharacterMovement()->MaxWalkSpeed *= SlideSpeedMultiplier;
 
-    UE_LOG(LogTemp, Warning, TEXT("Slide Start!"));
+    //既存タイマークリア
+    GetWorldTimerManager().ClearTimer(RollTimerHandle);
+
+    //2秒後に自動で終了
+    GetWorldTimerManager().SetTimer(
+        RollTimerHandle,
+        this,
+        &ARunnerCharacter::StopSlide,
+        SlideDuration,
+        false
+    );
+
+    UE_LOG(LogTemp, Warning, TEXT("Roll Start"));
 }
 
 void ARunnerCharacter::StopSlide()
@@ -256,7 +277,7 @@ void ARunnerCharacter::StopSlide()
     GetCharacterMovement()->MaxWalkSpeed /= SlideSpeedMultiplier;
 
     //メッシュを戻る
-    GetMesh()->AddLocalOffset(FVector(0.f, 0.f, -40.f));
+    GetMesh()->AddLocalOffset(FVector(0.f, 0.f, -50.f));
 
     UE_LOG(LogTemp, Warning, TEXT("Slide End!"));
 }
@@ -303,6 +324,7 @@ void ARunnerCharacter::OnClear()
     FRotator MeshRot = GetMesh()->GetRelativeRotation();
     MeshRot.Yaw += 180.f;
     GetMesh()->SetRelativeRotation(MeshRot);
+    GetMesh()->AddLocalOffset(FVector(0.f, 0.f, 60.f));
 
     //モンタージュ再生
     if (GoalMontage)
