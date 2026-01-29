@@ -517,8 +517,15 @@ void ARunnerCharacter::AddScore(int32 Amount)
 
         UE_LOG(LogTemp, Warning, TEXT("Speed Up! New Speed: %f"), ForwardSpeed);
     }
-    if (Score > 30)
+    if (Score % 10== 0)
     {
+        if (SpeedSound)
+        {
+            UGameplayStatics::PlaySoundAtLocation(this, SpeedSound, GetActorLocation());
+        }
+
+
+
         if (MotionImage)
         {
             float NewAlpha = FMath::Clamp(Score * 5.f, 0.f, 5.f);
