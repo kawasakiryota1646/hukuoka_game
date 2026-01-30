@@ -335,6 +335,22 @@ void ARunnerCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
 void ARunnerCharacter::OnClear()
 {
     bIsCleared = true;
+    bIsSliding = false;
+
+    if (GetCharacterMovement()->IsFalling())
+    {
+        // ① 移動を一旦止める
+        GetCharacterMovement()->StopMovementImmediately();
+
+        // ② 強制的に地上状態にする
+        GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+
+        // ③ 少しだけ下げて床に密着させる
+        FVector Loc = GetActorLocation();
+        Loc.Z -= 300.f; // ← ステージに合わせて調整
+        SetActorLocation(Loc, false, nullptr, ETeleportType::TeleportPhysics);
+    }
+
 
     if (SpringArmComp)
     {

@@ -104,7 +104,7 @@ protected:
 
     // スライディング時間
     UPROPERTY(EditAnywhere, Category = "Movement")
-    float SlideDuration = 1.5f;
+    float SlideDuration = 0.7f;
 
     // スライディング中の速度倍率
     UPROPERTY(EditAnywhere, Category = "Movement")
