@@ -14,8 +14,9 @@ FText UScoreWidget::GetScoreText() const
         ARunnerCharacter* Player = Cast<ARunnerCharacter>(PC->GetPawn());
         if (Player)
         {
-            return FText::FromString(FString::Printf(TEXT("Score: %d"), Player->GetScore()));
+            if(Player->Score>=10)
+            return FText::FromString(FString::Printf(TEXT("%d"), Player->GetScore()));
         }
     }
-    return FText::FromString(TEXT("Score: 0"));
+    return FText::FromString(TEXT(""));
 }
