@@ -65,6 +65,23 @@ void ARunnerCharacter::Tick(float DeltaTime)
     {
         OnDeath();
     }
+
+    if (MotionImage)
+    {
+        if (UCanvasPanelSlot* Slot = Cast<UCanvasPanelSlot>(MotionImage->Slot))
+        {
+            ShakeTime += DeltaTime;
+
+            float Strength = FMath::Clamp(ForwardSpeed / MaxForwardSpeed, 0.f, 1.f);
+            float OffsetX = FMath::Sin(ShakeTime * 40.f) * 5.f * Strength;
+            float OffsetY = FMath::Cos(ShakeTime * 30.f) * 3.f * Strength;
+
+            Slot->SetPosition(
+                OriginalPos + FVector2D(OffsetX, OffsetY)
+            );
+        }
+    }
+
 }
 
 void ARunnerCharacter::BeginPlay()
@@ -114,7 +131,13 @@ void ARunnerCharacter::BeginPlay()
         }
     }
 
-
+    if (MotionImage)
+    {
+        if (UCanvasPanelSlot* Slot = Cast<UCanvasPanelSlot>(MotionImage->Slot))
+        {
+            OriginalPos = Slot->GetPosition();
+        }
+    }
     StartCountdown();
 
 }
@@ -324,7 +347,6 @@ void ARunnerCharacter::OnClear()
     FRotator MeshRot = GetMesh()->GetRelativeRotation();
     MeshRot.Yaw += 180.f;
     GetMesh()->SetRelativeRotation(MeshRot);
-    GetMesh()->AddLocalOffset(FVector(0.f, 0.f, 60.f));
 
     //モンタージュ再生
     if (GoalMontage)
@@ -447,7 +469,19 @@ void ARunnerCharacter::RestartLevel()
 
 void ARunnerCharacter::MoveLevel()
 {
-    UGameplayStatics::OpenLevel(this, FName("StageSelect"));
+    FString CurrentLevelName = GetWorld()->GetName();
+
+
+    if (CurrentLevelName == TEXT("stage2"))
+    {
+        // Stage2クリア → ClearLevel
+        UGameplayStatics::OpenLevel(this, FName("Clear"));
+    }
+    else
+    {
+        UGameplayStatics::OpenLevel(this, FName("StageSelect"));
+
+    }
 }
 
 void ARunnerCharacter::TogglePause()
@@ -550,10 +584,12 @@ void ARunnerCharacter::AddScore(int32 Amount)
 
         if (MotionImage)
         {
-            float NewAlpha = FMath::Clamp(Score * 5.f, 0.f, 5.f);
+            float NewAlpha = FMath::Clamp(Score * 5.f, 0.f, 5.f); 
 
-            FLinearColor Col = MotionImage->ColorAndOpacity;
-            Col.A = NewAlpha;
+            FLinearColor Col = MotionImage->ColorAndOpacity; 
+
+            Col.A = NewAlpha; 
+
             MotionImage->SetColorAndOpacity(Col);
         }
     }

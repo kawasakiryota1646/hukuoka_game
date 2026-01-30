@@ -162,6 +162,9 @@ protected:
     void TogglePause();
     void ResumeGame();
 
+    FVector2D OriginalPos;
+    float ShakeTime = 0.f;
+
 
     // === アニメーション用 ===
 public:
