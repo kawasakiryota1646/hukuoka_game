@@ -2,7 +2,7 @@
 
 
 #include "ScoreWidget.h"
-
+#include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "RunnerCharacter.h"
 
@@ -12,6 +12,17 @@ FText UScoreWidget::GetScoreText() const
     if (PC)
     {
         ARunnerCharacter* Player = Cast<ARunnerCharacter>(PC->GetPawn());
+
+        if (Player->bIsCleared)
+        {
+            FSlateColor CurrentColor = ScoreText->GetColorAndOpacity();
+            FLinearColor LinearColor = CurrentColor.GetSpecifiedColor();
+
+            LinearColor.A = 1.0f; // © ‚±‚±‚¾‚¯•ÏX
+
+            ScoreText->SetColorAndOpacity(FSlateColor(LinearColor));
+        }
+
         if (Player)
         {
             if(Player->Score>=10)

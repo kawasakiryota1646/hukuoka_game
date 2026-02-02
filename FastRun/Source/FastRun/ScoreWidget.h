@@ -7,6 +7,8 @@
 #include "ScoreWidget.generated.h"
 
 
+class UTextBlock;
+
 /**
  * 
  */
@@ -16,6 +18,11 @@ class FASTRUN_API UScoreWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ScoreText;
+
+protected:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FText GetScoreText() const;
 };

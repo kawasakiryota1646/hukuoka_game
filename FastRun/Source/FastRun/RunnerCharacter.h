@@ -123,7 +123,7 @@ protected:
     void UpdateLaneMovement(float DeltaTime);
     void MoveLeft();
     void MoveRight();
-protected:
+public:
 
     // 死亡判定
     UFUNCTION()
