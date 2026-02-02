@@ -294,7 +294,7 @@ void ARunnerCharacter::StopSlide()
     bIsSliding = false;
 
     // カプセルを戻す
-    GetCapsuleComponent()->SetCapsuleHalfHeight(OriginalCapsuleHalfHeight);
+    GetCapsuleComponent()->SetCapsuleHalfHeight(OriginalCapsuleHalfHeight,true);
 
     // スピードを戻す
     GetCharacterMovement()->MaxWalkSpeed /= SlideSpeedMultiplier;
